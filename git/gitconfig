@@ -43,7 +43,12 @@
   changes = log --pretty=format:\"%h %cr %cn %Cgreen%s%Creset\" --name-status
   short = log --pretty=format:\"%h %cr %cn %Cgreen%s%Creset\"
   changelog = log --pretty=format:\" * %s\"
-  shortnocolor = log --pretty=format:\"%h %cr %cn %s\"
+  shortnocolor = log --pregitty=format:\"%h %cr %cn %s\"
+  myshit = "!f() { git log --since \"$1\" --author `git config user.email`; }; f"
+  #theirshit = log --since 1.week --author $0
+  new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+  out = log --pretty=oneline --abbrev-commit --graph ..@{u}
+  in = !git fetch && git log --pretty=oneline --abbrev-commit --graph @{u}..
 
   # pull
   pl = pull                         # pull
@@ -82,11 +87,14 @@
   svnr = svn rebase
   svnd = svn dcommit
   svnl = svn log --oneline --show-commit
+	ksreview = "!sh -c 'SHA=${1:-HEAD}; BRANCH=${2:-master}; if [ $SHA == $BRANCH ] ; then SHA=HEAD; fi; git difftool -y -t Kaleidoscope $BRANCH...$SHA;' -"
+	latest = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)'
 [format]
   pretty = format:%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
 [merge]
   summary = true
   verbosity = 1
+	tool = Kaleidoscope
 [apply]
   whitespace = nowarn
 [branch]
@@ -94,18 +102,44 @@
 [push]
   # 'git push' will push the current branch to its tracking branch
   # the usual default is to push all branches
-  default = tracking
+	default = current
 [core]
   autocrlf = false
   editor = vim
-  excludesfile = ~/.yadr/git/gitignore
+	excludesfile = ~/.yadr/git/gitignore
 [advice]
   statusHints = false
 [diff]
   # Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject
   # instead of a/b/c/d as prefixes for patches
   mnemonicprefix = true
+	tool = Kaleidoscope
 [rerere]
   # Remember my merges
   # http://gitfu.wordpress.com/2008/04/20/git-rerere-rereremember-what-you-did-last-time/
   enabled = true
+[user]
+	name = John Barker
+	email = jabarker1@gmail.com
+[git-up "bundler"]
+	check = true
+[difftool "Kaleidoscope"]
+	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[difftool]
+	prompt = false
+[mergetool "Kaleidoscope"]
+	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustExitCode = true
+[mergetool]
+	prompt = false
+[difftool "sourcetree"]
+	cmd = /usr/local/bin/ksdiff -w \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /usr/local/bin/ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustExitCode = true
+[github]
+	user = barkerja
+[ghi]
+	token = abbdbed24b7a81e995606f80c8f4b5cfcaff2674
+[credential]
